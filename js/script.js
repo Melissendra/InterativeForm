@@ -1,23 +1,34 @@
 // Caret in the name input when loading the page.
 const $name = $('#name');
-
-$name.trigger('focus'); // i use the trigger() method because it is said that focus() is deprecated and that it was better to use the trigger();
-
-// hiding hte input of other job when loading the page.
 const $otherTitle = $('#other-title');
-$otherTitle.hide();
-
-// Adding an event listener to the job role's dropdown
 const $jobCheck = $("#title");
+const $designItem = $('#design option');
+const $colorOption = $("#color option");
+const $colorTshirt = $("<option>Please select a T-Shirt theme</option>");
 
-//we loop through the option of the dropdown
-for(let i = 0; i < $jobCheck.length; i++){
-    //Adding a listener to each option
-    $jobCheck[i].addEventListener("click", function(e){
-        if(e.target.value === 'other'){
+const loadPage = () => {
+    $name.trigger('focus'); // I use the trigger() method because it is said that focus() is deprecated and that it was better to use the trigger();
+    $otherTitle.hide();
+    $("#color").prepend($colorTshirt);
+    $colorOption.eq(0).prop("selected", true);
+};
+
+
+// we loop through the option of the dropdown
+$jobCheck.each(function(){
+    $(this).on("change", function () {
+        if(this.value === 'other'){
             $otherTitle.show();
-        }else {
+        }else{
             $otherTitle.hide();
         }
     });
-}
+});
+
+
+loadPage();
+
+
+
+
+

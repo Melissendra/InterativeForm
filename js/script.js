@@ -6,11 +6,19 @@ const $design = $("#design");
 const $colors = $("#color");
 const $colorOption = $("#color option");
 const $colorIntro = $("<option>Please select a T-shirt theme</option>");
+let $cost = 0;
+const $totalCost = $("<div></div>").html("<strong> Total: " + $cost + "$</strong>");
+const $activities = $(".activities");
+
+
 
 const loadPage = () => {
     $name.trigger('focus'); // I use the trigger() method because it is said that focus() is deprecated and that it was better to use the trigger();
     $otherTitle.hide();
     showColorOption();
+    $activities.append($totalCost);
+    activityDate();
+    activityChange();
 };
 
 
@@ -53,12 +61,45 @@ const showColorOption= () =>{
                 showColorOption();
             }
         });
-  });
+    });
 };
 
 
-loadPage();
+const activityChange = () => {
+    $activities.change(function(e){
+        const $check  = e.target;
+        const $dataCost = parseInt($($check).attr("data-cost").replace(/\D(\d+)/, "$1"));
+        if($check.checked){
+            $cost += $dataCost;
+            $totalCost.html("<strong>Total: $" + $cost + "</strong>");
+        }else{
+            $cost -= $dataCost;
+            $totalCost.html("<strong>Total: $" + $cost + "</strong>");
+        }
+    });
+};
 
+const activityDate = () => {
+    $activities.change(function(e){
+        const $activitiesInput = $(".activities input");
+        const $check = e.target;
+        const $time = $check.dataset.dayAndTime;
+        const $name = $check.name;
+        $activitiesInput.each(function () {
+            if($time === $(this).attr("data-day-and-time") && $name !== $(this).attr('name')){
+                if($check.checked){
+                    $(this).attr("disabled", true);
+                    $(this).parent().css("color", "gray");
+                }else{
+                    $(this).removeAttr("disabled");
+                    $(this).parent().css("color", "black");
+                }
+            }
+        });
+    })
+};
+
+loadPage();
 
 
 

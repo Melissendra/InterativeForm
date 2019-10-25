@@ -163,6 +163,10 @@ option {
   clear: both;
 }
 
+.isDisabled{
+	color: gray;
+}
+
 /* ================================= 
   Media Queries
 ==================================== */

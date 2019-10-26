@@ -9,7 +9,8 @@ const $colorIntro = $("<option>Please select a T-shirt theme</option>");
 let $cost = 0;
 const $totalCost = $("<div></div>").html("<strong> Total: " + $cost + "$</strong>");
 const $activities = $(".activities");
-
+const $payment = $("#payment");
+const $paymentOption = $("#payment option");
 
 
 const loadPage = () => {
@@ -19,6 +20,7 @@ const loadPage = () => {
     $activities.append($totalCost);
     activityDate();
     activityChange();
+    selectOptionPayment();
 };
 
 
@@ -97,6 +99,38 @@ const activityDate = () => {
             }
         });
     })
+};
+
+const paymentChoice = (id1, id2, id3) =>{
+    $("#" + id1).show();
+    $("#" + id2).hide();
+    $("#" + id3).hide();
+};
+
+const selectOptionPayment = () => {
+    paymentChoice("credit-card", "paypal", "bitcoin");
+    $payment.change(function(){
+        const $optionPayment = $(this).val();
+        const $selectOptionInitial = $("#payment option[value='select method']");
+        if($optionPayment !== $selectOptionInitial){
+            $selectOptionInitial.hide();
+        }
+
+        switch($optionPayment){
+            case("Credit Card"):
+                paymentChoice("credit-card", "paypal", "bitcoin");
+                break;
+            case("PayPal"):
+                paymentChoice("paypal", "credit-card", "bitcoin");
+                break;
+            case("Bitcoin"):
+                paymentChoice("bitcoin", "credit-card", "paypal");
+                break;
+            default:
+                paymentChoice("credit-card", "paypal", "bitcoin");
+                break;
+        }
+    });
 };
 
 loadPage();

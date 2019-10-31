@@ -188,20 +188,21 @@ const activitiesValidation = () =>{
     }
 };
 
-const $ccNum = $("#cc-num");
-const numReg = /^\d{13,16}$/;
-const $cardNum = $ccNum.val();
-const zipReg = /^\d{5}$/;
-const $zip= $("#zip");
-const $zipNum = $zip.val();
-const cvvReg = /^\d{3}$/;
-const $cvv = $("#cvv");
-const $cvvNum = $cvv.val();
+
 
 const cardValidation = () =>{
-    errSentences("errorCard", $payment, "Please select the card payment method");
+    const $ccNum = $("#cc-num");
+    const numReg = /^\d{13,16}$/;
+    const $cardNum = $ccNum.val();
+    const zipReg = /^\d{5}$/;
+    const $zip= $("#zip");
+    const $zipNum = $zip.val();
+    const cvvReg = /^\d{3}$/;
+    const $cvv = $("#cvv");
+    const $cvvNum = $cvv.val();
     const $errCard = $("#errorCard");
     const $cardMethod = $payment.val();
+    errSentences("errorCard", $payment, "Please select the card payment method");
     if($cardMethod !== "Credit Card") {
         $errCard.show();
     }else{
@@ -211,8 +212,6 @@ const cardValidation = () =>{
         cardValid("cvvErr", cvvReg, $cvvNum, "Enter a 3 digits number", $cvv);
     }
 };
-
-
 
 const cardValid = (id, reg, num, text, el) =>{
     errSentences(id, $card, text);
@@ -225,50 +224,7 @@ const cardValid = (id, reg, num, text, el) =>{
         el.css("border", "1px solid red");
     }
 };
-/*const validCardNumber = () => {
-    const $ccNum = $("#cc-num");
-    errSentences("errNum", $card, "The Credit Card number must be between 13 and 16 digits");
-    const $errCardNum = $("#errNum");
-    const numReg = /^\d{13,16}$/;
-    const $cardNum = $ccNum.val();
-    if (numReg.test($cardNum)) {
-        $errCardNum.hide();
-        $ccNum.css("border", "");
-    }else {
-        $errCardNum.show();
-        $ccNum.css("border", "1px solid red");
-    }
-};
 
-const validZip = () =>{
-    const zipReg = /^\d{5}$/;
-    errSentences("zipErr", $card, "Please enter a 5 digits number");
-    const $zip= $("#zip");
-    const $errZip = $("#zipErr");
-    const $zipNum = $zip.val();
-    if(zipReg.test($zipNum)){
-        $errZip.hide();
-        $zip.css("border", "");
-    }else {
-        $errZip.show();
-        $zip.css("border", "1px solid red");
-    }
-};
-
-const validCvv = () =>{
-    const cvvReg = /^\d{3}$/;
-    errSentences("cvvErr", $card, "Enter a 3 digits number");
-    const $cvv = $("#cvv");
-    const $errCvv = $("#cvvErr");
-    const $cvvNum = $cvv.val();
-    if(cvvReg.test($cvvNum)){
-        $errCvv.hide();
-        $cvv.css("border", "");
-    }else{
-        $errCvv.show();
-        $cvv.css("border", "1px solid red");
-    }
-};*/
 
 $("button").click(function(e){
     e.preventDefault();

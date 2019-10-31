@@ -3,9 +3,10 @@ const $name = $('#name');
 const $otherTitle = $('#other-title');
 const $jobCheck = $("#title");
 const $design = $("#design");
-const $colors = $("#color");
+// const $colors = $("#color");
 const $colorOption = $("#color option");
-const $colorIntro = $("<option>Please select a T-shirt theme</option>");
+// const $colorIntro = $("<option>Please select a T-shirt theme</option>");
+const $colorDiv = $("#colors-js-puns");
 let $cost = 0;
 const $totalCost = $("<div></div>").html("<strong> Total: " + $cost + "$</strong>");
 const $activities = $(".activities");
@@ -22,12 +23,13 @@ const loadPage = () => {
     $otherTitle.hide();
     showColorOption();
     $activities.append($totalCost);
-    errSentences();
     activityDate();
     activityChange();
     selectOptionPayment();
+    cardValidation();
+    submitForm();
+    nameValidationRealTime();
 };
-
 
 // we loop through the option of the dropdown
 $jobCheck.each(function(){
@@ -36,19 +38,24 @@ $jobCheck.each(function(){
     });
 });
 
+/***** No longer needed since we hide the div color if no T-shirt theme select *****/
 
-const $showFirstColorOption = () => {
+/*const $showFirstColorOption = () => {
     $colorOption.hide();
     $colors.prepend($colorIntro);
     $("#color option:first-child").prop("selected", true);
-};
+};*/
 
-//function that show you only the color option according to the theme chosen
+//function that shows you only the color option according to the theme chosen
 const showColorOption= () =>{
-    $showFirstColorOption();
+    // $showFirstColorOption(); No longer needed
+    if($design.val() === "Select Theme"){
+        $colorDiv.hide();
+    }
+
     $design.each(function(){
         $(this).on('change', function(){
-            $colorIntro.hide();
+            $colorDiv.show();
             if(this.value === 'js puns'){
                 $colorOption.each(function(){
                     $(this).val() === "cornflowerblue" || $(this).val() === "darkslategrey" || $(this).val() === "gold"
@@ -66,7 +73,7 @@ const showColorOption= () =>{
                 $("#color option[value='tomato']").prop("selected", true);
 
             }else if(this.value === 'Select Theme'){
-                $showFirstColorOption();
+                $colorDiv.hide();
             }
         });
     });
@@ -141,6 +148,7 @@ const selectOptionPayment = () => {
     });
 };
 
+//function to create dynamically error sentences
 const errSentences = (id, el, text) =>{
     const $error = $(`<div>${text}</div>`);
     $error.attr("id", id)
@@ -149,34 +157,42 @@ const errSentences = (id, el, text) =>{
         .insertBefore(el);
 };
 
-const nameValidation = () => {
-    errSentences("nameError", $name, "Please enter a name");
-    const $errorName = $("#nameError");
-    const $nameVal = $name.val();
-    if($nameVal.length === 0){
-        $errorName.show();
-        $name.css("border", "1px solid red");
+//function to validate the different forms
+const validation = (id, reg, num, text, el, el2=el) =>{
+    errSentences(id, el, text);
+    const $err = $('#' + id);
+    if(reg.test(num)){
+        $err.hide();
+        el2.css("border", "");
     }else{
-        $errorName.hide();
-        $name.css("border", "");
+        $err.show();
+        el2.css("border", "1px solid red");
     }
+};
+
+//Check the name form
+const nameValidation = () => {
+    const nameReg = /^([a-zA-Z]{2,10})+$/;
+    const $nameVal = $name.val();
+    validation('nameError', nameReg, $nameVal, "Please enter a valid name", $name);
+};
+
+//check the name form in real time
+const nameValidationRealTime = () =>{
+    $name.keypress(function(e){
+        const nameReg = /^([a-zA-Z]{2,10})+$/;
+        const $nameVal = e.target.value;
+        validation("nameError", nameReg, $nameVal, "Please enter a valid name", $name);
+    });
 };
 
 const emailValidation = () =>{
-    errSentences('mailError', $mail, "Address mail invalid");
-    const $errMail = $("#mailError");
-    // $errMail.text("Address mail invalid");
+    const $mailVal = $mail.val();
     const mailReg = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-
-    if(!mailReg.test($mail.val())){
-        $errMail.show();
-        $mail.css("border", "1px solid red")
-    }else{
-        $errMail.hide();
-        $mail.css("border", "");
-    }
+    validation("mailError", mailReg, $mailVal, "Address Mail Invalid", $mail);
 };
 
+// Function to check if at least one activity is checked
 const activitiesValidation = () =>{
     errSentences("actError", $activitiesLabelName, "Please check at least one activity");
     const $errorAct = $("#actError");
@@ -187,8 +203,6 @@ const activitiesValidation = () =>{
         $errorAct.show();
     }
 };
-
-
 
 const cardValidation = () =>{
     const $ccNum = $("#cc-num");
@@ -201,38 +215,28 @@ const cardValidation = () =>{
     const $cvv = $("#cvv");
     const $cvvNum = $cvv.val();
     const $errCard = $("#errorCard");
-    const $cardMethod = $payment.val();
+    const $paymentMethod = $payment.val();
     errSentences("errorCard", $payment, "Please select the card payment method");
-    if($cardMethod !== "Credit Card") {
+    if($paymentMethod !== "Credit Card" && $cardNum.length > 0) {
         $errCard.show();
-    }else{
+    }else if($paymentMethod === "Credit Card"){
         $errCard.hide();
-        cardValid("cardNumErr", numReg, $cardNum, "The Credit Card number must be between 13 and 16 digits", $ccNum);
-        cardValid("zipErr", zipReg, $zipNum, "Please enter a 5 digits number", $zip);
-        cardValid("cvvErr", cvvReg, $cvvNum, "Enter a 3 digits number", $cvv);
-    }
-};
-
-const cardValid = (id, reg, num, text, el) =>{
-    errSentences(id, $card, text);
-    const $err = $('#' + id);
-    if(reg.test(num)){
-        $err.hide();
-        el.css("border", "");
-    }else{
-        $err.show();
-        el.css("border", "1px solid red");
+        validation("cardNumErr", numReg, $cardNum, "The Credit Card number must be between 13 and 16 digits", $card, $ccNum);
+        validation("zipErr", zipReg, $zipNum, "Please enter a 5 digits number",$card, $zip);
+        validation("cvvErr", cvvReg, $cvvNum, "Enter a 3 digits number",$card, $cvv);
     }
 };
 
 
-$("button").click(function(e){
-    e.preventDefault();
-    nameValidation();
-    emailValidation();
-    activitiesValidation();
-    cardValidation();
-});
+const submitForm = () => {
+    $("form").submit(function (e) {
+        e.preventDefault();
+        nameValidation();
+        emailValidation();
+        activitiesValidation();
+        cardValidation();
+    });
+};
 
 loadPage();
 

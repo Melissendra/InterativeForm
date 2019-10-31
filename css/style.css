@@ -153,8 +153,8 @@ option {
   Helper Classes
 ==================================== */
 
-.is-hidden {
-	display: none;
+.error{
+	color: #A91937;
 }
 
 .clearfix::after {

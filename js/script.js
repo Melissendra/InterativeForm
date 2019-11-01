@@ -15,7 +15,9 @@ const $activitiesLabelName = $(".activities input[name='all']");
 const $payment = $("#payment");
 const $mail = $('#mail');
 const $card = $("#credit-card");
-
+const $ccNum = $("#cc-num");
+const $zip = $("#zip");
+const $cvv = $("#cvv");
 
 // function that load the page
 const loadPage = () => {
@@ -29,6 +31,8 @@ const loadPage = () => {
     cardValidation();
     submitForm();
     nameValidationRealTime();
+    mailValidationRealTime();
+    cardReal()
 };
 
 // we loop through the option of the dropdown
@@ -97,6 +101,7 @@ const activityChange = () => {
 // function that disable the incompatible activities
 const activityDate = () => {
     $activities.change(function(e){
+        activitiesValidation();
         const $check = e.target;
         const $time = $check.dataset.dayAndTime;
         const $name = $check.name;
@@ -134,12 +139,19 @@ const selectOptionPayment = () => {
         switch($optionPayment){
             case("Credit Card"):
                 paymentChoice("credit-card", "paypal", "bitcoin");
+                cardValidation();
                 break;
             case("PayPal"):
                 paymentChoice("paypal", "credit-card", "bitcoin");
+                eraseError("cardErr");
+                eraseError("zipErr");
+                eraseError("cvvErr");
                 break;
             case("Bitcoin"):
                 paymentChoice("bitcoin", "credit-card", "paypal");
+                eraseError("cardErr");
+                eraseError("zipErr");
+                eraseError("cvvErr");
                 break;
             default:
                 paymentChoice("credit-card", "paypal", "bitcoin");
@@ -157,12 +169,20 @@ const errSentences = (id, el, text) =>{
         .insertBefore(el);
 };
 
+const eraseError = (id) =>{
+    const $error = $('#' + id);
+    if($error){
+        $error.remove();
+    }
+};
+
 //function to validate the different forms
 const validation = (id, reg, num, text, el, el2=el) =>{
     errSentences(id, el, text);
     const $err = $('#' + id);
     if(reg.test(num)){
-        $err.hide();
+        // $err.hide();
+        eraseError(id);
         el2.css("border", "");
     }else{
         $err.show();
@@ -172,17 +192,15 @@ const validation = (id, reg, num, text, el, el2=el) =>{
 
 //Check the name form
 const nameValidation = () => {
-    const nameReg = /^([a-zA-Z]{2,10})+$/;
+    const nameReg = /^([a-zA-Z]{4,10})$/;
     const $nameVal = $name.val();
     validation('nameError', nameReg, $nameVal, "Please enter a valid name", $name);
 };
 
 //check the name form in real time
 const nameValidationRealTime = () =>{
-    $name.keypress(function(e){
-        const nameReg = /^([a-zA-Z]{2,10})+$/;
-        const $nameVal = e.target.value;
-        validation("nameError", nameReg, $nameVal, "Please enter a valid name", $name);
+    $name.keyup(() =>{
+        nameValidation();
     });
 };
 
@@ -192,41 +210,68 @@ const emailValidation = () =>{
     validation("mailError", mailReg, $mailVal, "Address Mail Invalid", $mail);
 };
 
+const mailValidationRealTime = () =>{
+    $mail.keyup( () => {
+        emailValidation();
+    });
+};
+
+
 // Function to check if at least one activity is checked
 const activitiesValidation = () =>{
     errSentences("actError", $activitiesLabelName, "Please check at least one activity");
     const $errorAct = $("#actError");
     const $activityChecked = $(".activities input:checked");
     if($activityChecked.length > 0){
-        $errorAct.hide();
+        eraseError("actError");
     }else{
         $errorAct.show();
     }
 };
 
-const cardValidation = () =>{
-    const $ccNum = $("#cc-num");
+// function this checked if everything is conformed
+const cardValidation = () => {
     const numReg = /^\d{13,16}$/;
     const $cardNum = $ccNum.val();
     const zipReg = /^\d{5}$/;
-    const $zip= $("#zip");
     const $zipNum = $zip.val();
     const cvvReg = /^\d{3}$/;
-    const $cvv = $("#cvv");
     const $cvvNum = $cvv.val();
     const $errCard = $("#errorCard");
     const $paymentMethod = $payment.val();
-    errSentences("errorCard", $payment, "Please select the card payment method");
-    if($paymentMethod !== "Credit Card" && $cardNum.length > 0) {
-        $errCard.show();
-    }else if($paymentMethod === "Credit Card"){
-        $errCard.hide();
-        validation("cardNumErr", numReg, $cardNum, "The Credit Card number must be between 13 and 16 digits", $card, $ccNum);
-        validation("zipErr", zipReg, $zipNum, "Please enter a 5 digits number",$card, $zip);
-        validation("cvvErr", cvvReg, $cvvNum, "Enter a 3 digits number",$card, $cvv);
+    const $activityChecked = $(".activities input:checked");
+
+    errSentences("errorCard", $payment, "Please select the card payment method or any other payment method");
+    // function will trigger only if at least one activity is selected
+    if($activityChecked.length > 0){
+        if($paymentMethod === "select method"){
+            $errCard.text("Please select a payment method");
+            $errCard.show();
+        }else if($paymentMethod !== "Credit Card" && $cardNum.length > 0) {
+            $errCard.show();
+        }else if($paymentMethod === "Credit Card"){
+            $errCard.hide();
+            validation("cardErr", numReg, $cardNum, "The Credit Card number must be between 13 and 16 digits", $card, $ccNum);
+            validation("zipErr", zipReg, $zipNum, "Please enter a 5 digits number",$card, $zip);
+            validation("cvvErr", cvvReg, $cvvNum, "Enter a 3 digits number",$card, $cvv);
+        }else if($paymentMethod === "PayPal"){
+            $errCard.hide();
+        }
     }
 };
 
+//real time card validation
+const cardReal = () =>{
+    $ccNum.keyup(()=>{
+        cardValidation();
+    });
+    $zip.keyup(()=>{
+        cardValidation();
+    })
+    $cvv.keyup(()=>{
+        cardValidation();
+    })
+};
 
 const submitForm = () => {
     $("form").submit(function (e) {

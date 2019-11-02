@@ -28,11 +28,12 @@ const loadPage = () => {
     activityDate();
     activityChange();
     selectOptionPayment();
-    cardValidation();
     submitForm();
     nameValidationRealTime();
     mailValidationRealTime();
-    cardReal()
+    cardValidation();
+    cardDefault();
+    cardReal();
 };
 
 // we loop through the option of the dropdown
@@ -119,6 +120,15 @@ const activityDate = () => {
     })
 };
 
+//function to select the card payment by default
+const cardDefault = () =>{
+    $("#payment [value='select method']").hide();
+    $("#payment [value='Credit Card']").attr("selected", true);
+    $ccNum.css("border", "");
+    $zip.css("border", "");
+    $cvv.css("border", "");
+};
+
 //function to add/remove dynamically the payment choice div
 const paymentChoice = (id1, id2, id3) =>{
     $("#" + id1).show();
@@ -139,16 +149,18 @@ const selectOptionPayment = () => {
         switch($optionPayment){
             case("Credit Card"):
                 paymentChoice("credit-card", "paypal", "bitcoin");
-                cardValidation();
+                cardDefault();
                 break;
             case("PayPal"):
                 paymentChoice("paypal", "credit-card", "bitcoin");
+                eraseError("errorCard");
                 eraseError("cardErr");
                 eraseError("zipErr");
                 eraseError("cvvErr");
                 break;
             case("Bitcoin"):
                 paymentChoice("bitcoin", "credit-card", "paypal");
+                eraseError("errorCard");
                 eraseError("cardErr");
                 eraseError("zipErr");
                 eraseError("cvvErr");
@@ -192,7 +204,7 @@ const validation = (id, reg, num, text, el, el2=el) =>{
 
 //Check the name form
 const nameValidation = () => {
-    const nameReg = /^([a-zA-Z]{4,10})$/;
+    const nameReg = /^([a-zA-Z ]{4,18})$/;
     const $nameVal = $name.val();
     validation('nameError', nameReg, $nameVal, "Please enter a valid name", $name);
 };
@@ -238,27 +250,27 @@ const cardValidation = () => {
     const cvvReg = /^\d{3}$/;
     const $cvvNum = $cvv.val();
     const $errCard = $("#errorCard");
-    const $paymentMethod = $payment.val();
-    const $activityChecked = $(".activities input:checked");
+    const $cardMethod = $payment.val("Credit Card");
 
-    errSentences("errorCard", $payment, "Please select the card payment method or any other payment method");
-    // function will trigger only if at least one activity is selected
-    if($activityChecked.length > 0){
-        if($paymentMethod === "select method"){
-            $errCard.text("Please select a payment method");
-            $errCard.show();
-        }else if($paymentMethod !== "Credit Card" && $cardNum.length > 0) {
-            $errCard.show();
-        }else if($paymentMethod === "Credit Card"){
-            $errCard.hide();
-            validation("cardErr", numReg, $cardNum, "The Credit Card number must be between 13 and 16 digits", $card, $ccNum);
-            validation("zipErr", zipReg, $zipNum, "Please enter a 5 digits number",$card, $zip);
-            validation("cvvErr", cvvReg, $cvvNum, "Enter a 3 digits number",$card, $cvv);
-        }else if($paymentMethod === "PayPal"){
-            $errCard.hide();
-        }
+    if($cardNum.length === 0) {
+        errSentences("errorCard", $payment, "Please enter your card number or select another payment method");
+        $errCard.show();
+        eraseError("cardError");
+        eraseError("zipErr");
+        eraseError("cvvErr");
+        $ccNum.css("border", "1px solid red");
+        $zip.css("border", "1px solid red");
+        $cvv.css("border", "1px solid red");
+
+        //when you begin to enter the number card it show you what you have to enter
+    }else if($cardMethod) {
+        $errCard.hide();
+        validation("cardErr", numReg, $cardNum, "The Credit Card number must be between 13 and 16 digits", $card, $ccNum);
+        validation("zipErr", zipReg, $zipNum, "Please enter a 5 digits number", $card, $zip);
+        validation("cvvErr", cvvReg, $cvvNum, "Enter a 3 digits number", $card, $cvv);
     }
 };
+
 
 //real time card validation
 const cardReal = () =>{
@@ -279,6 +291,7 @@ const submitForm = () => {
         nameValidation();
         emailValidation();
         activitiesValidation();
+        selectOptionPayment();
         cardValidation();
     });
 };
